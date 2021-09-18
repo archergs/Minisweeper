@@ -32,7 +32,7 @@ class Cell : Hashable, ObservableObject {
     // has the mine been revealed to the player
     var isRevealed: Bool
     // has the cell been flagged by the player
-    var state: CellState
+    @Published var state: CellState
     // if a cell has been selected and it wasn't a mine, this is the number it will show
     var number: Int
     
@@ -46,7 +46,7 @@ class Cell : Hashable, ObservableObject {
     init(x: Int, y: Int) {
         // Randomly choose, for each cell, whether it is a mine
         let rand = Int.random(in: Range(0...10))
-        isMine = rand >= 8
+        isMine = rand == 10
         
         if isMine{
             mine = Mine(x: x, y: y)
@@ -72,14 +72,13 @@ class Cell : Hashable, ObservableObject {
             // game over, player clicked on a mine
             GameManager.gameInstance.gameOver()
         } else {
-            print("tap")
             state = .uncovered
             calculateNumber()
             color = .green
         }
     }
     
-    func calculateNumber(){
+    private func calculateNumber(){
         let gm = GameManager.gameInstance
         let cells = gm.cells
         
@@ -100,18 +99,37 @@ class Cell : Hashable, ObservableObject {
             for coord in adjacentCoords {
                 for cell in row{
                     if cell.xCoord == coord.0 && cell.yCoord == coord.1{
-                        print("(\(cell.xCoord),\(cell.yCoord)")
-                        print("(\(coord.0),\(coord.1)")
-                        if cell.isMine == true{
+                        if cell.isMine{
                             hasAdjacentMine = true
                             number += 1
-                        } else if cell.state == .covered && !hasAdjacentMine{
-                            cell.cellHasBeenSelected()
                         }
-                        
                     }
                 }
             }
+        }
+        
+        for row in cells{
+            for coord in adjacentCoords {
+                for cell in row{
+                    if cell.xCoord == coord.0 && cell.yCoord == coord.1{
+                        if !cell.isMine && !hasAdjacentMine && cell.state == .covered {
+                            cell.cellHasBeenSelected()
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+    
+    func toggleFlag(){
+        if state == .flagged{
+            state = .covered
+            return
+        }
+        if state == .covered{
+            state = .flagged
+            color = .red
         }
     }
     

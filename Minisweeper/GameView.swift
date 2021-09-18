@@ -17,10 +17,12 @@ struct GameCell: View {
                 .foregroundColor(cell.color)
                 .border(Color.red, width: 2)
                 .frame(width: 40, height: 40, alignment: .center)
-            if(cell.isMine){
+            if(cell.isMine && GameManager.gameInstance.easyMode){
                 Text("M")
             } else if cell.state == .uncovered{
                 Text("\(cell.number)")
+            } else if cell.state == .flagged{
+                Text("F")
             }
         }
     }
@@ -58,8 +60,10 @@ struct GameView: View {
                     ForEach(gm.cells, id: \.self) { row in
                         ForEach(row, id: \.self) { cell in
                             GameCell(cell: cell)
+                                .onTapGesture(count: 2) {
+                                    cell.toggleFlag()
+                                }
                                 .onTapGesture(perform: {
-                                    print("Selected: (\(cell.xCoord),\(cell.yCoord))")
                                     cell.cellHasBeenSelected()
                                 })
                         }
@@ -71,6 +75,16 @@ struct GameView: View {
             gm.createGame()
         })
         .frame(width: 300, height: 480, alignment: .center)
+    }
+    
+    func singleClick(cell: Cell){
+        print("Selected: (\(cell.xCoord),\(cell.yCoord))")
+        cell.cellHasBeenSelected()
+    }
+    
+    func doubleClick(cell: Cell){
+        print("double")
+        cell.toggleFlag()
     }
 }
 

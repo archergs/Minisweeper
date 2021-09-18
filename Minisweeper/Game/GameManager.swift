@@ -18,6 +18,9 @@ class GameManager: ObservableObject{
     
     var cells: [[Cell]] = []
     
+    // Prefs
+    var easyMode = false
+    
     func createGame(){
         for y in Range(0...boardWidth - 1){
             cells.append([])
