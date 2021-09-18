@@ -19,13 +19,13 @@ class GameManager: ObservableObject{
     var cells: [[Cell]] = []
     
     func createGame(){
-        for y in Range(0...boardHeight - 1){
+        for y in Range(0...boardWidth - 1){
             cells.append([])
-            for x in Range(0...boardWidth - 1){
+            for x in Range(0...boardHeight - 1){
                 cells[y].append(Cell(x: x, y: y))
             }
         }
-        print(cells)
+        
         createdGame = true
     }
     

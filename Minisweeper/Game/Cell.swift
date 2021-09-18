@@ -8,6 +8,12 @@
 import Foundation
 import SwiftUI
 
+enum CellState{
+    case covered
+    case uncovered
+    case flagged
+}
+
 class Cell : Hashable, ObservableObject {
     static func == (lhs: Cell, rhs: Cell) -> Bool {
         return lhs.identifier == rhs.identifier
@@ -26,7 +32,9 @@ class Cell : Hashable, ObservableObject {
     // has the mine been revealed to the player
     var isRevealed: Bool
     // has the cell been flagged by the player
-    var isFlagged: Bool
+    var state: CellState
+    // if a cell has been selected and it wasn't a mine, this is the number it will show
+    var number: Int
     
     // will be green if selected and clear, orange if not selected yet
     @Published var color: Color
@@ -37,17 +45,20 @@ class Cell : Hashable, ObservableObject {
     
     init(x: Int, y: Int) {
         // Randomly choose, for each cell, whether it is a mine
-        isMine = Bool.random()
+        let rand = Int.random(in: Range(0...10))
+        isMine = rand >= 8
         
         if isMine{
             mine = Mine(x: x, y: y)
+            number = -1
         } else {
             mine = nil
+            number = 0
         }
         
         isRevealed = false
         
-        isFlagged = false
+        state = .covered
         
         color = Color.orange
         
@@ -62,7 +73,45 @@ class Cell : Hashable, ObservableObject {
             GameManager.gameInstance.gameOver()
         } else {
             print("tap")
+            state = .uncovered
+            calculateNumber()
             color = .green
+        }
+    }
+    
+    func calculateNumber(){
+        let gm = GameManager.gameInstance
+        let cells = gm.cells
+        
+        var hasAdjacentMine = false
+        
+        let adjacentCoords = [(xCoord,yCoord-1),
+                              (xCoord,yCoord+1),
+                              (xCoord+1,yCoord),
+                              (xCoord-1,yCoord),
+                              (xCoord+1,yCoord-1),
+                              (xCoord-1,yCoord-1),
+                              (xCoord+1,yCoord+1),
+                              (xCoord-1,yCoord+1)]
+        
+        print("Selected: (\(xCoord),\(yCoord))")
+        
+        for row in cells{
+            for coord in adjacentCoords {
+                for cell in row{
+                    if cell.xCoord == coord.0 && cell.yCoord == coord.1{
+                        print("(\(cell.xCoord),\(cell.yCoord)")
+                        print("(\(coord.0),\(coord.1)")
+                        if cell.isMine == true{
+                            hasAdjacentMine = true
+                            number += 1
+                        } else if cell.state == .covered && !hasAdjacentMine{
+                            cell.cellHasBeenSelected()
+                        }
+                        
+                    }
+                }
+            }
         }
     }
     

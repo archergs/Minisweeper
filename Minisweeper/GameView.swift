@@ -19,10 +19,10 @@ struct GameCell: View {
                 .frame(width: 40, height: 40, alignment: .center)
             if(cell.isMine){
                 Text("M")
+            } else if cell.state == .uncovered{
+                Text("\(cell.number)")
             }
-        }.onTapGesture(perform: {
-            cell.cellHasBeenSelected()
-        })
+        }
     }
 }
 
@@ -58,6 +58,10 @@ struct GameView: View {
                     ForEach(gm.cells, id: \.self) { row in
                         ForEach(row, id: \.self) { cell in
                             GameCell(cell: cell)
+                                .onTapGesture(perform: {
+                                    print("Selected: (\(cell.xCoord),\(cell.yCoord))")
+                                    cell.cellHasBeenSelected()
+                                })
                         }
                     }
                 }.padding(.horizontal)
