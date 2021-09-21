@@ -20,7 +20,7 @@ struct GameCell: View {
             if(cell.isMine && GameManager.gameInstance.easyMode){
                 Text("M")
             } else if cell.state == .uncovered{
-                Text("\(cell.number)")
+                Text("\(cell.adjacentMines)")
             } else if cell.state == .flagged{
                 Text("F")
             }

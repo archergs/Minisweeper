@@ -40,4 +40,8 @@ class GameManager: ObservableObject{
     func gameOver(){
         newGame()
     }
+    
+    func finishGame(){
+        print("game finished")
+    }
 }

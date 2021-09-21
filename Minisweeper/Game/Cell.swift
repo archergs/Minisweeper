@@ -34,7 +34,7 @@ class Cell : Hashable, ObservableObject {
     // has the cell been flagged by the player
     @Published var state: CellState
     // if a cell has been selected and it wasn't a mine, this is the number it will show
-    var number: Int
+    var adjacentMines: Int
     
     // will be green if selected and clear, orange if not selected yet
     @Published var color: Color
@@ -50,10 +50,10 @@ class Cell : Hashable, ObservableObject {
         
         if isMine{
             mine = Mine(x: x, y: y)
-            number = -1
+            adjacentMines = -1
         } else {
             mine = nil
-            number = 0
+            adjacentMines = 0
         }
         
         isRevealed = false
@@ -95,13 +95,13 @@ class Cell : Hashable, ObservableObject {
         
         print("Selected: (\(xCoord),\(yCoord))")
         
-        for row in cells{
-            for coord in adjacentCoords {
+        for coord in adjacentCoords {
+            for row in cells{
                 for cell in row{
                     if cell.xCoord == coord.0 && cell.yCoord == coord.1{
                         if cell.isMine{
                             hasAdjacentMine = true
-                            number += 1
+                            adjacentMines += 1
                         }
                     }
                 }
@@ -123,6 +123,8 @@ class Cell : Hashable, ObservableObject {
     }
     
     func toggleFlag(){
+        let gm = GameManager.gameInstance
+        
         if state == .flagged{
             state = .covered
             return
@@ -131,6 +133,32 @@ class Cell : Hashable, ObservableObject {
             state = .flagged
             color = .red
         }
+        
+        if areAllMinesFlagged(){
+            gm.finishGame()
+            return
+        }
+    }
+    
+    private func areAllMinesFlagged() -> Bool{
+        let gm = GameManager.gameInstance
+        let cells = gm.cells
+        
+        for row in cells{
+            for cell in row{
+                if cell.isMine{
+                    if cell.state == .flagged{
+                        continue
+                    } else {
+                        return false
+                    }
+                } else if cell.state == .covered{
+                    return false
+                }
+            }
+        }
+        
+        return true
     }
     
 }
