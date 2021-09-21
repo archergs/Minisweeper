@@ -119,7 +119,11 @@ class Cell : Hashable, ObservableObject {
                 }
             }
         }
-
+        
+        if areAllMinesFlaggedOrUncovered(){
+            gm.finishGame()
+            return
+        }
     }
     
     func toggleFlag(){
@@ -134,13 +138,13 @@ class Cell : Hashable, ObservableObject {
             color = .red
         }
         
-        if areAllMinesFlagged(){
+        if areAllMinesFlaggedOrUncovered(){
             gm.finishGame()
             return
         }
     }
     
-    private func areAllMinesFlagged() -> Bool{
+    private func areAllMinesFlaggedOrUncovered() -> Bool{
         let gm = GameManager.gameInstance
         let cells = gm.cells
         
